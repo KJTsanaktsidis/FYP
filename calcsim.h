@@ -4,6 +4,7 @@ int calc_simulation(const double* Dvector,
                     const double* initCond,
                     int ndt, int ndx,
                     int dt, int dx,
+                    double r,
                     double* simResults);
 
 #define SIM_SUCCESS 0

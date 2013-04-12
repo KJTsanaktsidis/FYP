@@ -1,4 +1,4 @@
-#include <calcsim.h>
+#include "calcsim.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -33,7 +33,7 @@ int calc_simulation(const double* Dvector,
         {
             //Work out lookup indicies for D and R based on concentration
             int Ckm1Index = lround(prevStep[k-1] * (nIV - 1));
-            int CkIndex = rlound(prevStep[k] * (nIV - 1));
+            int CkIndex = lround(prevStep[k] * (nIV - 1));
             int Ckp1Index = lround(prevStep[k+1] * (nIV - 1));
 
             //This tells us if our previous concentrations were outside [0,1]
@@ -47,24 +47,24 @@ int calc_simulation(const double* Dvector,
 
             //Indicies for calculating either central, left or right difference derivative of dCdx;
             //Central unless we have C = 0 or C = 1
-            dLeftIndex = CkIndex == 0 ? CkIndex : CkIndex - 1;
-            dRightIndex = CkIndex == (nIV - 1) ? CkIndex : CkIndex + 1;
+            int dLeftIndex = CkIndex == 0 ? CkIndex : CkIndex - 1;
+            int dRightIndex = CkIndex == (nIV - 1) ? CkIndex : CkIndex + 1;
 
             //Calculate derivatives based on these indicies
             //Multiply by nIV-1 to turn indicies into units of concentration
-            dDdc = (DVector[dRightIndex] - DVector[dLeftIndex]) /
+            double dDdc = (Dvector[dRightIndex] - Dvector[dLeftIndex]) /
                         (dRightIndex - dLeftIndex) * (nIV - 1);
-            dRdc = (RVector[dRightIndex] - RVector[dLeftIndex]) /
+            double dRdc = (Rvector[dRightIndex] - Rvector[dLeftIndex]) /
                         (dRightIndex - dLeftIndex) * (nIV - 1);
 
             //Current values of D and R
-            double Dv = DVector[CkIndex];
-            double Rv = RVector[CkIndex];
+            double Dv = Dvector[CkIndex];
+            double Rv = Rvector[CkIndex];
 
             //Concentrations and derivatives thereof
-            C = prevStep[k];
-            dCdx = (prevStep[k+1] - prevStep[k]) / dx;
-            d2Cdx2 = (prevStep[k+1] - 2 * prevStep[k] + prevStep[k-1]) / (dx * dx);
+            double C = prevStep[k];
+            double dCdx = (prevStep[k+1] - prevStep[k]) / dx;
+            double d2Cdx2 = (prevStep[k+1] - 2 * prevStep[k] + prevStep[k-1]) / (dx * dx);
 
             //the next step
             simResults[k] = dt * (Dv*d2Cdx2 + dDdc*dCdx*dCdx - dDdc*C*Rv*r - Dv*Rv*dCdx*r
