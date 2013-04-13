@@ -1,4 +1,6 @@
-#include "calcsim.h"
+#define SIM_UNSTABLE 1
+#define SIM_SUCCESS 0
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -8,7 +10,7 @@ int calc_simulation(const double* Dvector,
                     int nIV,
                     const double* initCond,
                     int ndt, int ndx,
-                    int dt, int dx,
+                    double dt, double dx,
                     double r,
                     double* simResults)
 {

@@ -2,3 +2,4 @@ workspace.xml
 build/
 *.o
 *.so
+__pycache__/
