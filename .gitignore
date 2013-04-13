@@ -1,2 +1,4 @@
 workspace.xml
 build/
+*.o
+*.so
