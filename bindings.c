@@ -1,3 +1,4 @@
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
@@ -74,7 +75,11 @@ static PyObject* diffsim_calc_simulation(PyObject* self, PyObject* args)
     double* DVectorC = PyArray_DATA(DVectorNewObj);
     double* RVectorC = PyArray_DATA(RVectorNewObj);
     double* initCondC = PyArray_DATA(initCondNewObj);
+    //We just make the wonderful assumption that their len == nIV; don't fuck this precondition up!
 
+    npy_intp dims[1];
+    dims[0] = ndx;
+    PyObject* returnObj = PyArray_Simple_New(1, dims, NPY_DOUBLE);
 
 
     Py_DECREF(DVectorNewObj);

@@ -79,3 +79,8 @@ int calc_simulation(const double* Dvector,
     free(prevStep);
     return SIM_SUCCESS;
 }
+
+double test_third_element(double* array)
+{
+    return array[2];
+}
