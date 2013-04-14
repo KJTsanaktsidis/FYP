@@ -27,25 +27,24 @@ class InputDatastore():
 
         nSets = np.shape(self.experimental_raw)[1] - 1
         self.experimental_dict = dict()
-        self.experimental_C = self.experimental_raw[1:, 0]
+        self.experimental_x = self.experimental_raw[1:, 0]
         for col_index in range(1, nSets + 1):
             current = self.experimental_raw[0, col_index]
             self.experimental_dict[current] = self.experimental_raw[1:, col_index]
 
-    def interpolated_vector(self, d_type, size):
-        if d_type == 'diffusivity':
-            operative_vec = self.diffusivity_raw
-        elif d_type == 'resistivity':
-            operative_vec = self.resistivity_raw
-        else:
-            raise ValueError('Unknown d_type ' + d_type)
+    def interpolated_vector(self, operative_vec, size):
 
         spline = interp.InterpolatedUnivariateSpline(operative_vec[:, 0], operative_vec[:, 1])
         x = np.linspace(0, 1, num=size)
         return spline(x)
 
     def interpolated_diffusivity(self, size):
-        return self.interpolated_vector('diffusivity', size)
+        return self.interpolated_vector(self.diffusivity_raw, size)
 
     def interpolated_resistivity(self, size):
-        return self.interpolated_vector('resistivity', size)
+        return self.interpolated_vector(self.resistivity_raw, size)
+
+    def interpolated_experiment(self, current, x):
+        data = self.experimental_dict[current]
+        spline = interp.InterpolatedUnivariateSpline(self.experimental_x, data)
+        return spline(x)

@@ -18,6 +18,9 @@ class CalcSimWrapper:
             ctypes.c_int32, ctypes.c_int32, ctypes.c_double, ctypes.c_double,
             ctypes.c_double, ctypes.POINTER(ctypes.c_double)
         ]
+        self.libcalcsim.fast_pad_shift.argtypes = [
+            ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_int32
+        ]
 
     def emigration_factor(self, z, I_density, T):
         """
@@ -105,6 +108,27 @@ class CalcSimWrapper:
         if res == 1:
             raise SimulationUnstableError("Simulation was unstable, aborting...")
         return out_contig
+
+    def fast_pad_shift(self, y1, y2):
+        """
+        Wrapper around fast_pad_shift() in fastshift.c
+
+        Works out the optimum number of indicies by which y2 needs to be shifted to have the minimum
+        least squares error between the two
+
+        :param y1: The array that will not be shifted
+        :param y2: The array that will be shifted
+        """
+
+        if len(y1) != len(y2):
+            raise ValueError("Input sizes must be the same")
+
+        y1_contig = np.ascontiguousarray(y1, dtype=np.float64)
+        y2_contig = np.ascontiguousarray(y2, dtype=np.float64)
+        y1_ptr = y1_contig.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+        y2_ptr = y2_contig.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+
+        return self.libcalcsim.fast_pad_shift(y1_ptr, y2_ptr, len(y1))
 
 
 class SimulationUnstableError(Exception):
