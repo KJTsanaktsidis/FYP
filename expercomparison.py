@@ -44,7 +44,7 @@ class ComparisonEngine():
             shifted = np.concatenate((add, keep))
         elif self.shift < 0:
             keep = model[-self.shift:]
-            add = np.zeros(self.shift)
+            add = np.zeros(-self.shift)
             shifted = np.concatenate((keep, add))
         else:
             shifted = model

@@ -48,3 +48,9 @@ class InputDatastore():
         data = self.experimental_dict[current]
         spline = interp.InterpolatedUnivariateSpline(self.experimental_x, data)
         return spline(x)
+
+    def interpolated_experiment_dict(self, x):
+        newdict = dict()
+        for key in self.experimental_dict.keys():
+            newdict[key] = self.interpolated_experiment(key, x)
+        return newdict
