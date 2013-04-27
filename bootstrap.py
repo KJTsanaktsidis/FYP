@@ -11,8 +11,8 @@ from pylab import *
 
 
 def do_param_search():
-    z_list = arange(0, 3200, 200)
-    diff_list = arange(0, 52, 2)
+    z_list = arange(500, 1550, 50)
+    diff_list = arange(1, 5.5, 0.5)
     cs = CalcSimWrapper()
     ds = InputDatastore('../InputData', 'NiCu', 973)
     ps = ParamSearchEngine(cs, ds)
@@ -33,7 +33,7 @@ def do_param_search():
 
     #print(logstream.getvalue())
 
-    extent = 0, 50, 0, 3000
+    extent = 1, 50, 0, 3000
     immap = imshow(retim, cmap=cm.jet, interpolation='nearest', extent=extent)
     colorbar(immap)
     ylabel('z* (arb. units)')

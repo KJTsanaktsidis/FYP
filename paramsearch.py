@@ -29,7 +29,7 @@ class ParamSearchEngine():
         self.calcsim_wrapper = calcsim_wrapper
         self.input_datastore = input_datastore
 
-    def search(self, z_list, dmult_list, emigration_T, progress_cb):
+    def search(self, z_list, dmult_list, I, emigration_T, progress_cb):
         """
         This method will compute calcsim_wrapper.calc_simulation() for every value of z* and Cv in
         z_range and dmult_range and for every current in input_datastore.
@@ -56,19 +56,14 @@ class ParamSearchEngine():
         #now create a queue
         work_queue = itertools.product(z_list, dmult_list)
 
-        #for q in work_queue:
-        #    print('(' + str(q[0]) + ', ' + str(q[1]) + ')\n')
-
         #create storage
         ret_storage = np.zeros((len(z_list), len(dmult_list)))
 
         unstable_count = 0
 
-        logging.info('Testing logging')
-
         with ThreadPoolExecutor(max_workers=4) as executor:
             future_dict = dict(
-                ((executor.submit(self.do_work, qit[0], qit[1]), qit)
+                ((executor.submit(self.do_work, qit[0], qit[1], I), qit)
                  for qit in work_queue)
             )
             pcount = 0
@@ -79,13 +74,13 @@ class ParamSearchEngine():
                 d_index = np.nonzero(dmult_list == qit[1])[0][0]
                 try:
                     simres = res_future.result()
-                    logging.info(str.format(
+                    logging.debug(str.format(
                         'Writing ({}, {}) (val = {}) into position ({}, {})',
                         qit[0], qit[1], simres, z_index, d_index
                     ))
                     ret_storage[z_index, d_index] = simres
                 except SimulationUnstableError:
-                    logging.warning(str.format(
+                    logging.debug(str.format(
                         'Simulation unstable for ({}, {}) for position ({}, {})',
                         qit[0], qit[1], z_index, d_index
                     ))
@@ -97,7 +92,7 @@ class ParamSearchEngine():
         logging.info('Simulation unstable count: ' + str(unstable_count))
         return ret_storage
 
-    def do_work(self, z, dmult):
+    def do_work(self, z, dmult, I):
         """
         Actually does one item of work from the search() method
 
@@ -106,20 +101,11 @@ class ParamSearchEngine():
         :return: A measure of how good the model fits the data for these parameters
         """
 
-        logging.info(str.format('Executing workload ({}, {}))', z, dmult))
-        lsq_results = list()
-
-        for I in self.exper_data.keys():
-            if I == 0:
-                dv = 1
-            else:
-                dv = dmult
-            r = self.calcsim_wrapper.emigration_factor(z, I, self.emigration_T)
-            simresults = self.calcsim_wrapper.calc_simulation(self.diffusivity, self.resistivity,
-                                                              self.init_cond, self.ndt, self.dt, self.dx,
-                                                              r, dv)
-            ce = ComparisonEngine(self.calcsim_wrapper)
-            lsq, shift = ce.calibrate(simresults, self.exper_data[I])
-            lsq_results.append(lsq)
-
-        return sum(lsq_results)
+        logging.debug(str.format('Executing workload ({}, {}))', z, dmult))
+        r = self.calcsim_wrapper.emigration_factor(z, I, self.emigration_T)
+        simresults = self.calcsim_wrapper.calc_simulation(self.diffusivity, self.resistivity,
+                                                          self.init_cond, self.ndt, self.dt, self.dx,
+                                                          r, dmult)
+        ce = ComparisonEngine(self.calcsim_wrapper)
+        lsq, shift = ce.calibrate(simresults, self.exper_data[I])
+        return lsq

@@ -8,7 +8,7 @@ import scipy.interpolate as interp
 
 class InputDatastore():
 
-    def __init__(self, data_dir, prefix, T):
+    def __init__(self, data_dir, prefix, T, direction):
         """
         Initialiser for this datastore
 
@@ -19,11 +19,11 @@ class InputDatastore():
         #we store 3 kinds of data
         diff_name = os.path.join(data_dir, prefix + '_Diffusivity_' + str(T) + 'K.csv')
         resist_name = os.path.join(data_dir, prefix + '_Resistivity_' + str(T) + 'K.csv')
-        exper_name = os.path.join(data_dir, prefix + '_Experimental_' + str(T) + 'K.csv')
+        exper_name = os.path.join(data_dir, str.format('{}_Experimental_{}_{}K.csv', prefix, T, direction))
 
         self.diffusivity_raw = np.genfromtxt(diff_name, skip_header=1)
         self.resistivity_raw = np.genfromtxt(resist_name, skip_header=1)
-        self.experimental_raw = np.genfromtxt(exper_name, skip_header=1)
+        self.experimental_raw = np.genfromtxt(exper_name, skip_header=0)
 
         nSets = np.shape(self.experimental_raw)[1] - 1
         self.experimental_dict = dict()
