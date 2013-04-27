@@ -45,7 +45,7 @@ for idx, I in enumerate(args.currents):
     f_smoothed[1:, idx + 1] = process_file('forward', I)
     f_smoothed[0, idx + 1] = I
     r_smoothed[1:, idx + 1] = process_file('reverse', I)
-    r_smoothed[0, idx + 1] = -I
+    r_smoothed[0, idx + 1] = I
 
     if args.plot:
         f = plt.figure()
