@@ -49,8 +49,8 @@ class ParamSearchEngine():
         self.init_cond[100:] = 0
 
         self.emigration_T = emigration_T
-        self.dt = 0.005
-        self.ndt = int(2 * 60 * 60 / 0.005)
+        self.dt = 0.01
+        self.ndt = int(2 * 60 * 60 / 0.01)
         self.dx = 25e-6 / 200
 
         #now create a queue
@@ -64,26 +64,29 @@ class ParamSearchEngine():
 
         unstable_count = 0
 
+        logging.info('Testing logging')
+
         with ThreadPoolExecutor(max_workers=4) as executor:
             future_dict = dict(
-                ((executor.submit(lambda: self.do_work(qit[0], qit[1])), qit)
+                ((executor.submit(self.do_work, qit[0], qit[1]), qit)
                  for qit in work_queue)
             )
             pcount = 0
             for res_future in futures.as_completed(future_dict):
                 qit = future_dict[res_future]
+
                 z_index = np.nonzero(z_list == qit[0])[0][0]
                 d_index = np.nonzero(dmult_list == qit[1])[0][0]
                 try:
                     simres = res_future.result()
                     logging.info(str.format(
-                        'Writing ({}, {}) (val = {}) into position ({}, {})\n',
+                        'Writing ({}, {}) (val = {}) into position ({}, {})',
                         qit[0], qit[1], simres, z_index, d_index
                     ))
                     ret_storage[z_index, d_index] = simres
                 except SimulationUnstableError:
                     logging.warning(str.format(
-                        'Simulation unstable for ({}, {}) for position ({}, {})\n',
+                        'Simulation unstable for ({}, {}) for position ({}, {})',
                         qit[0], qit[1], z_index, d_index
                     ))
                     unstable_count += 1
@@ -91,7 +94,7 @@ class ParamSearchEngine():
                 pcount += 1
                 progress_cb(pcount)
 
-        logging.info('Simulation unstable count: ' + unstable_count + '\n')
+        logging.info('Simulation unstable count: ' + str(unstable_count))
         return ret_storage
 
     def do_work(self, z, dmult):
@@ -103,25 +106,20 @@ class ParamSearchEngine():
         :return: A measure of how good the model fits the data for these parameters
         """
 
-        r = self.calcsim_wrapper.emigration_factor(z, 0, self.emigration_T)
-        zc_simresults = self.calcsim_wrapper.calc_simulation(self.diffusivity, self.resistivity,
-                                                             self.init_cond, self.ndt, self.dt, self.dx,
-                                                             r, dmult)
-        #zc_simresults *= 1e6
-        ce = ComparisonEngine(self.calcsim_wrapper)
-        noI_lsq, noI_shift = ce.calibrate(zc_simresults, self.exper_data[0])
+        logging.info(str.format('Executing workload ({}, {}))', z, dmult))
         lsq_results = list()
-        lsq_results.append(noI_lsq)
 
         for I in self.exper_data.keys():
             if I == 0:
-                continue
+                dv = 1
+            else:
+                dv = dmult
             r = self.calcsim_wrapper.emigration_factor(z, I, self.emigration_T)
             simresults = self.calcsim_wrapper.calc_simulation(self.diffusivity, self.resistivity,
                                                               self.init_cond, self.ndt, self.dt, self.dx,
-                                                              r, dmult)
-            #simresults *= 1e6
-            lsq = ce.shifted_lsq(simresults, self.exper_data[I])
+                                                              r, dv)
+            ce = ComparisonEngine(self.calcsim_wrapper)
+            lsq, shift = ce.calibrate(simresults, self.exper_data[I])
             lsq_results.append(lsq)
 
         return sum(lsq_results)

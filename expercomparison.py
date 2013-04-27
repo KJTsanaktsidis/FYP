@@ -51,6 +51,23 @@ class ComparisonEngine():
 
         return self.lsq(shifted, experiment)
 
+    def shift_data(self, data):
+        """
+        Get the shifted data
+        """
+        if self.shift > 0:
+            #right shift
+            keep = data[:-self.shift]
+            add = np.ones(self.shift)
+            shifted = np.concatenate((add, keep))
+        elif self.shift < 0:
+            keep = data[-self.shift:]
+            add = np.zeros(-self.shift)
+            shifted = np.concatenate((keep, add))
+        else:
+            shifted = data
+        return shifted
+
     def lsq(self, y1, y2):
         """
         This method computes the sum of the squares of the differences between y1 and y2

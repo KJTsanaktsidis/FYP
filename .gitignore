@@ -3,3 +3,6 @@ build/
 *.o
 *.so
 __pycache__/
+*.csv
+*.png
+*~
