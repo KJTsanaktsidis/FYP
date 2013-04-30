@@ -8,22 +8,25 @@ import scipy.interpolate as interp
 
 class InputDatastore():
 
-    def __init__(self, data_dir, prefix, T, direction):
+    def __init__(self, data_dir, prefix, Tfloat, direction):
         """
         Initialiser for this datastore
 
         :param data_dir: Directory where the csv files are found
         :param prefix: Prefix for the filenames
-        :param T: Temperature in kelvin
+        :param Tfloat: Temperature in kelvin
         """
+
+        T = int(Tfloat)
+
         #we store 3 kinds of data
         diff_name = os.path.join(data_dir, prefix + '_Diffusivity_' + str(T) + 'K.csv')
         resist_name = os.path.join(data_dir, prefix + '_Resistivity_' + str(T) + 'K.csv')
-        exper_name = os.path.join(data_dir, str.format('{}_Experimental_{}_{}K.csv', prefix, T, direction))
+        exper_name = os.path.join(data_dir, str.format('{}_Experimental_{}_{}K.csv', prefix, direction, T))
 
         self.diffusivity_raw = np.genfromtxt(diff_name, skip_header=1)
         self.resistivity_raw = np.genfromtxt(resist_name, skip_header=1)
-        self.experimental_raw = np.genfromtxt(exper_name, skip_header=0)
+        self.experimental_raw = np.genfromtxt(exper_name, skip_header=0, delimiter=',')
 
         nSets = np.shape(self.experimental_raw)[1] - 1
         self.experimental_dict = dict()

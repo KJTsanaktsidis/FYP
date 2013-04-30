@@ -27,7 +27,7 @@ class ComparisonEngine():
 
         self.model = model
         self.shift = self.cs.fast_pad_shift(experiment, model)
-        return self.lsq(model, experiment), self.shift
+        return self.lsq(self.shift_data(model), experiment), self.shift
 
     def shifted_lsq(self, model, experiment):
         """

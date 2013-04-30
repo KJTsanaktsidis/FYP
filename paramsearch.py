@@ -40,18 +40,18 @@ class ParamSearchEngine():
 
         #set up the work
 
-        self.x = np.linspace(0, 25, num=200)
+        self.x = np.linspace(0, 25, num=100)
         self.exper_data = self.input_datastore.interpolated_experiment_dict(self.x)
         self.diffusivity = self.input_datastore.interpolated_diffusivity(10001)
         self.resistivity = self.input_datastore.interpolated_resistivity(10001)
 
-        self.init_cond = np.ones(200)
-        self.init_cond[100:] = 0
+        self.init_cond = np.ones(100)
+        self.init_cond[50:] = 0
 
         self.emigration_T = emigration_T
-        self.dt = 0.01
-        self.ndt = int(2 * 60 * 60 / 0.01)
-        self.dx = 25e-6 / 200
+        self.dt = 0.05
+        self.ndt = int(2 * 60 * 60 / 0.05)
+        self.dx = 25e-6 / 100
 
         #now create a queue
         work_queue = itertools.product(z_list, dmult_list)
@@ -61,7 +61,7 @@ class ParamSearchEngine():
 
         unstable_count = 0
 
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with ThreadPoolExecutor(max_workers=8) as executor:
             future_dict = dict(
                 ((executor.submit(self.do_work, qit[0], qit[1], I), qit)
                  for qit in work_queue)
@@ -102,7 +102,7 @@ class ParamSearchEngine():
         """
 
         logging.debug(str.format('Executing workload ({}, {}))', z, dmult))
-        r = self.calcsim_wrapper.emigration_factor(z, I, self.emigration_T)
+        r = self.calcsim_wrapper.emigration_factor(z, I * 100 * 100, self.emigration_T)
         simresults = self.calcsim_wrapper.calc_simulation(self.diffusivity, self.resistivity,
                                                           self.init_cond, self.ndt, self.dt, self.dx,
                                                           r, dmult)
