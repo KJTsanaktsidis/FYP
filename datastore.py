@@ -32,7 +32,7 @@ class InputDatastore():
         self.experimental_dict = dict()
         self.experimental_x = self.experimental_raw[1:, 0]
         for col_index in range(1, nSets + 1):
-            current = self.experimental_raw[0, col_index]
+            current = int(self.experimental_raw[0, col_index])
             self.experimental_dict[current] = self.experimental_raw[1:, col_index]
 
     def interpolated_vector(self, operative_vec, size):

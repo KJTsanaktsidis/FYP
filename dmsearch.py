@@ -12,6 +12,7 @@ from progressbar import ProgressBar, Percentage, Bar
 
 from datastore import InputDatastore
 from calcsim import CalcSimWrapper
+from expercomparison import ComparisonEngine
 from paramsearch import ParamSearchEngine
 
 
@@ -43,6 +44,9 @@ cvfrange = np.arange(args.cvflim[0], args.cvflim[1], args.cvflim[2])
 fresults = dict()
 rresults = dict()
 
+np.savetxt(path.join(args.outputdir, 'zrange.csv'), zrange, delimiter=',')
+np.savetxt(path.join(args.outputdir, 'cvfrange.csv'), cvfrange, delimiter=',')
+
 if args.resume:
     files = [path.join(args.outputdir, f) for f in os.listdir(args.outputdir)
              if path.isfile(path.join(args.outputdir, f))]
@@ -55,7 +59,7 @@ if args.resume:
         fresults[I] = np.genfromtxt(f, skip_header=0, delimiter=',')
     for f in reversefiles:
         print(str.format('Processing {}', f))
-        I = float(re.match(rx, f).groups()[0])
+        I = -float(re.match(rx, f).groups()[0])
         rresults[I] = np.genfromtxt(f, skip_header=0, delimiter=',')
 else:
     #do search for forward/back
@@ -77,18 +81,25 @@ else:
 
 fzaverage = 0
 ict = 0
+zvalues = []
+cresults = {}
 
-#find average for forward
+#multiply forward/reverse maps to get current-min maps
 for I in fresults.keys():
+    combined_map = fresults[I] * rresults[I]
+    outpath = path.join(args.outputdir, str.format('Searchmap_I{}_combined.png', I))
+    dmplots.plot_search_map(combined_map, (zrange[0], zrange[-1]), (cvfrange[0], cvfrange[-1]), I,
+                            'combined', outpath)
+    cresults[I] = combined_map
     if I == 0:
         continue
-    min_indicies = np.unravel_index(fresults[I].argmin(), fresults[I].shape)
-    min_val = (min_indicies[0] * args.zlim[2], min_indicies[1] * args.cvflim[2])
-    fzaverage += min_val[0]
-    ict += 1
+    min_indicies = np.unravel_index(combined_map.argmin(), combined_map.shape)
+    min_z = zrange[min_indicies[0]]
+    print(str.format('Combined z* for I = {}: {}', I, min_z))
+    zvalues.append(min_z)
 
-fzaverage /= ict
-print(str.format('Average z* for {} bias: {}', 'forward', fzaverage))
+fzaverage = np.array(zvalues).mean()
+print(str.format('Average z*: {}', fzaverage))
 
 
 def find_nearest(array, value):
@@ -99,9 +110,7 @@ zaverage_rounded, zaverage_index = find_nearest(zrange, fzaverage)
 print(str.format('Rounding to {}', zaverage_rounded))
 
 #now find our optimum positions
-for direction, result_stash in [('forward', fresults), ('reverse', rresults)]:
-    zaverage = 0
-    ict = 0
+for direction, result_stash in [('forward', fresults), ('reverse', rresults), ('combined', cresults)]:
     for I in result_stash.keys():
         min_indicies = np.unravel_index(result_stash[I].argmin(), result_stash[I].shape)
         min_val = (zrange[min_indicies[0]], cvfrange[min_indicies[1]])
@@ -121,3 +130,46 @@ for direction, result_stash in [('forward', fresults), ('reverse', rresults)]:
     plotarr = np.column_stack((I_plotarr, cvf_plotarr))
     outfname = os.path.join(args.outputdir, str.format('cvfplot_{}.png', direction))
     dmplots.plot_cvf_function(plotarr, direction, outfname)
+
+    #let's plot z* as well
+    z_plotlist = []
+    for I in I_plotlist:
+        z_best_idx = np.unravel_index(result_stash[I].argmin(), result_stash[I].shape)[1]
+        z_best = zrange[z_best_idx]
+        z_plotlist.append(z_best)
+
+    z_plotarr = np.array(z_plotlist)
+    plotarr = np.column_stack((I_plotarr, z_plotarr))
+    outfname = os.path.join(args.outputdir, str.format('zplot_{}.png', direction))
+    dmplots.plot_z_function(plotarr, direction, outfname)
+
+    #we should be nice and print comparison plots
+    if direction == 'forward' or direction == 'reverse':
+        x = np.linspace(0, 25, num=100)
+        dstore = InputDatastore(args.inputdata, args.dataprefix, args.temperature, direction)
+        accelcs = CalcSimWrapper()
+        ce = ComparisonEngine(accelcs)
+        diffusivity = dstore.interpolated_diffusivity(10001)
+        resistivity = dstore.interpolated_resistivity(10001)
+        init_cond = np.ones(100)
+        init_cond[50:] = 0
+        emigration_T = args.temperature
+        dt = 0.05
+        ndt = int(2 * 60 * 60 / 0.05)
+        dx = 25e-6 / 100
+        for I in result_stash.keys():
+            cvf_best = cvfrange[result_stash[I][zaverage_index, :].argmin()]
+            if direction == 'forward':
+                exper_data = dstore.interpolated_experiment_dict(x)[I]
+                r = accelcs.emigration_factor(zaverage_rounded, I * 100 * 100, emigration_T)
+            else:
+                exper_data = dstore.interpolated_experiment_dict(x)[-I]
+                r = accelcs.emigration_factor(zaverage_rounded, -I * 100 * 100, emigration_T)
+            simd = accelcs.calc_simulation(diffusivity, resistivity, init_cond, ndt, dt, dx, r, cvf_best)
+            lsq, shift = ce.calibrate(simd, exper_data)
+            shifted_simd = ce.shift_data(simd)
+            full_simd = np.column_stack((x, shifted_simd))
+            full_exper = np.column_stack((x, exper_data))
+            outfname = os.path.join(args.outputdir, str.format('SimExperComp_I{}_{}.png', I, direction))
+            dmplots.plot_sim_fit(full_simd, full_exper, I, zaverage_rounded, cvf_best, direction, outfname)
+

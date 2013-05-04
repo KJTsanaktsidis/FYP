@@ -32,6 +32,19 @@ def plot_cvf_function(data, direction, fname):
     canvas.print_figure(fname)
 
 
+def plot_z_function(data, direction, fname):
+    fig = Figure()
+    ax = fig.add_subplot(111)
+    ax.plot(data[:, 0], data[:, 1], 'bx')
+    ax.set_xlim((0, data[:, 0].max() * 1.2))
+    ax.set_ylim((0, data[:, 1].max() * 1.2))
+    ax.set_xlabel('Current Density (A/cm^2)')
+    ax.set_ylabel('Effective valence (z*)')
+    ax.set_title(str.format('Effective valence for {} bias', direction))
+    canvas = FigureCanvas(fig)
+    canvas.print_figure(fname)
+
+
 def plot_sim_fit(simdata, experdata, I, z, cvf, direction, fname):
     fig = Figure()
     ax = fig.add_subplot(111)
@@ -43,5 +56,18 @@ def plot_sim_fit(simdata, experdata, I, z, cvf, direction, fname):
     ax.set_ylabel('Concentration fraction of Cu')
     ax.legend()
     ax.set_title(str.format('Simulation for I = {} A/cm^2, {} bias, z* = {}, Cvf = {}', I, direction, z, cvf))
+    canvas = FigureCanvas(fig)
+    canvas.print_figure(fname)
+
+
+def plot_cvf_function_ebars(data, ebars, direction, fname):
+    fig = Figure()
+    ax = fig.add_subplot(111)
+    ax.errorbar(data[:, 0], data[:, 1], xerr=None, yerr=ebars, elinewidth=1, fmt='bx')
+    ax.set_xlim((0, data[:, 0].max() * 1.2))
+    ax.set_ylim((0, (data[:, 1].max() + ebars.max().max()) * 1.2))
+    ax.set_xlabel('Current Density (A/cm^2)')
+    ax.set_ylabel('Vacancy concentration multiplier')
+    ax.set_title(str.format('Vacancy concentration for {} bias', direction))
     canvas = FigureCanvas(fig)
     canvas.print_figure(fname)

@@ -3,6 +3,6 @@
   <component name="CppTools.Loader" reportImplicitCastToBool="false" reportNameReferencedOnce="false" version="3" additionalPreprocessorDefs="" compilerSelect="AUTO">
     <system-include-dir path="/usr/include/python3.2" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.2.3 (/usr/bin/python3.2)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.3.1 (/usr/bin/python3.3)" project-jdk-type="Python SDK" />
 </project>
 
