@@ -69,7 +69,7 @@ int calc_simulation(const double* Dvector,
             double d2Cdx2 = (prevStep[k+1] - 2 * prevStep[k] + prevStep[k-1]) / (dx * dx);
 
             //the next step
-            simResults[k] = dt * (Dv*d2Cdx2 + dDdc*dCdx*dCdx - dDdc*C*Rv*r - Dv*Rv*dCdx*r
+            simResults[k] = dt * (Dv*d2Cdx2 + dDdc*dCdx*dCdx - dDdc*dCdx*C*Rv*r - Dv*Rv*dCdx*r
                                   -Dv*dRdc*dCdx*r) + prevStep[k];
         }
 
