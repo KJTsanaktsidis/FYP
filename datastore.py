@@ -25,7 +25,6 @@ class InputDatastore():
         fw_exper_name = os.path.join(data_dir, str.format('{}_Experimental_{}_{}K.csv', prefix, 'forward', '973'))
         rv_exper_name = os.path.join(data_dir, str.format('{}_Experimental_{}_{}K.csv', prefix, 'reverse', '973'))
 
-        self.diffusivity_raw = np.genfromtxt(diff_name, skip_header=1)
         self.resistivity_raw = np.genfromtxt(resist_name, skip_header=1)
         self.experimental_fw_raw = np.genfromtxt(fw_exper_name, skip_header=0, delimiter=',')
         self.experimental_rv_raw = np.genfromtxt(rv_exper_name, skip_header=0, delimiter=',')
@@ -43,6 +42,16 @@ class InputDatastore():
                 current = int(np.abs(raw[0, col_index]))
                 edict[current] = raw[1:, col_index]
 
+        #the 3 resistivity functions
+        self.diffusivity_raw = {}
+        self.diffusivity_splines = {}
+        for T in (900, 1000, 1100):
+            fname = os.path.join(data_dir, "{}_Diffusivity_{}K.csv".format(prefix, T))
+            self.diffusivity_raw[T] = np.genfromtxt(fname, skip_header=1)
+            self.diffusivity_raw[T] = self.diffusivity_raw[T][::-1, :]
+            self.diffusivity_splines[T] = interp.InterpolatedUnivariateSpline(self.diffusivity_raw[T][:, 1],
+                                                                              self.diffusivity_raw[T][:, 1])
+
     def interpolated_vector(self, operative_vec, size):
 
         spline = interp.InterpolatedUnivariateSpline(operative_vec[:, 0], operative_vec[:, 1])
@@ -50,10 +59,15 @@ class InputDatastore():
         return spline(x)
 
     def interpolated_diffusivity(self, size, T):
-        return self.interpolated_vector(self.diffusivity_raw, size)
+        x = np.linspace(0, 1, size)
+        f = lambda c: np.exp(16.53*c-33.14)*np.exp(-(122109*c+28274)/(8.31*T))
+        return f(x)
 
     def interpolated_resistivity(self, size, T):
-        return self.interpolated_vector(self.resistivity_raw, size)
+        x = np.linspace(0, 1, size)
+        for idx, xv in enumerate(x):
+            p = np.polyfit([900, 1000, 1100], [self.diffusivity_splines[qT](xv) for qT in (900, 1000, 1100)], 1)[0]
+            x[idx] = p[0] * T + p[1]
 
     def interpolated_experiment(self, current, x, edict):
         edict = self.edict_for_direction(edict)
