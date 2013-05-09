@@ -105,7 +105,6 @@ class CalcSimWrapper:
 
         #and shell out
         logging.debug(str.format('About to move to native code (r = {})', r))
-        logging.debug(str.format('Diffusivity avg: Input {}, Revised {}', D_vector.mean(), D_contig.mean()))
         res = self.libcalcsim.calc_simulation(D_ptr, R_ptr, nIV, init_cond_ptr,
                                               ndt, ndx, dt, dx, r, out_ptr)
         if res == 1:

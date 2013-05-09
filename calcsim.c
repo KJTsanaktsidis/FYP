@@ -47,7 +47,7 @@ int calc_simulation(const double* Dvector,
                 return SIM_UNSTABLE;
             }
 
-            //Indicies for calculating either central, left or right difference derivative of dCdx;
+            //Indicies for calculating either central, left or right difference derivative of dDdc/dRdc;
             //Central unless we have C = 0 or C = 1
             int dLeftIndex = CkIndex == 0 ? CkIndex : CkIndex - 1;
             int dRightIndex = CkIndex == (nIV - 1) ? CkIndex : CkIndex + 1;
@@ -70,7 +70,7 @@ int calc_simulation(const double* Dvector,
 
             //the next step
             simResults[k] = dt * (Dv*d2Cdx2 + dDdc*dCdx*dCdx - dDdc*dCdx*C*Rv*r - Dv*Rv*dCdx*r
-                                  -Dv*dRdc*dCdx*r) + prevStep[k];
+                                  -Dv*dRdc*dCdx*C*r) + prevStep[k];
         }
 
         //Now swap current step into prev step
@@ -82,7 +82,3 @@ int calc_simulation(const double* Dvector,
     return SIM_SUCCESS;
 }
 
-double test_third_element(double* array)
-{
-    return array[2];
-}

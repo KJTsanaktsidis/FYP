@@ -45,19 +45,18 @@ def plot_z_function(data, direction, fname):
     canvas.print_figure(fname)
 
 
-def plot_sim_fit(simdata, experdata, I, z, cvf, direction, fname):
+def plot_sim_fit(simdata, experdata, I, z, cvf, direction):
     fig = Figure()
     ax = fig.add_subplot(111)
     ax.plot(simdata[:, 0], simdata[:, 1], 'b', label='Simulation')
     ax.plot(experdata[:, 0], experdata[:, 1], 'r', label='Experimental')
-    ax.set_xlim((0, 25))
+    ax.set_xlim((simdata[:, 0].min(), simdata[:, 0].max()))
     ax.set_ylim((0, 1))
     ax.set_xlabel('Position (micron)')
     ax.set_ylabel('Concentration fraction of Cu')
     ax.legend()
-    ax.set_title(str.format('Simulation for I = {} A/cm^2, {} bias, z* = {}, Cvf = {}', I, direction, z, cvf))
-    canvas = FigureCanvas(fig)
-    canvas.print_figure(fname)
+    ax.set_title(str.format('Simulation for I = {} A/cm^2, {} bias,\nz* = {:0.2f}, Cvf = {:0.2f}', I, direction, z, cvf))
+    return fig
 
 
 def plot_cvf_function_ebars(data, ebars, direction, fname):
