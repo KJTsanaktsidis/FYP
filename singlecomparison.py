@@ -2,7 +2,7 @@
 simdata and experimental data
 """
 from argparse import ArgumentParser
-from calcsim import CalcSimWrapper
+from calcsim import CalcSimWrapper, SimulationUnstableError
 from calcsimexecutor import CalcSimExecutor
 from datastore import InputDatastore
 from diffsimtask import DiffSimTask
@@ -43,7 +43,11 @@ class SingleComparisonTask(DiffSimTask):
         """Our stage 1 is to do the requested simulation and spit out a csv file with (x, sim, exper)
         """
         simexec = CalcSimExecutor(self.dstore, self.args.temperature)
-        simdata = simexec.compute(self.args.z, self.args.cvf, self.args.current, self.args.direction)
+        try:
+            simdata = simexec.compute(self.args.z, self.args.cvf, self.args.current, self.args.direction)
+        except SimulationUnstableError:
+            print('Bang! Dmax = {}'.format(simexec.Dvector.max()))
+            raise
         experdata = self.dstore.interpolated_experiment(self.args.current, simdata[:, 0], self.args.direction)
 
         ce = ComparisonEngine(CalcSimWrapper())
