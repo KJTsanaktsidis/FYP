@@ -9,7 +9,7 @@ def plot_search_map(datamap, zlim, cvflim, I, direction, fname):
     fig = Figure()
     ax = fig.add_subplot(111)
     extent = cvflim[0], cvflim[1], zlim[0], zlim[1]
-    im = ax.imshow(datamap, cmap=cm.jet, interpolation='nearest', extent=extent)
+    im = ax.imshow(datamap, cmap=cm.jet, interpolation='nearest', extent=extent, origin='lower')
     fig.colorbar(im)
     ax.set_aspect('auto')
     ax.set_xlabel('Vacancy concentration multiplier')
