@@ -6,7 +6,9 @@ from matplotlib.figure import Figure
 from calcsim import SimulationUnstableError
 from calcsimexecutor import CalcSimExecutor
 from datastore import InputDatastore
+import defaults
 from diffsimtask import DiffSimTask
+from expercomparison import ComparisonEngine
 from outstore import OutputDatastore
 import numpy as np
 import itertools
@@ -19,7 +21,7 @@ z = 1875
 cvfunc = lambda ID: 0.0014 * ID
 
 Idensities = np.arange(0, 10200, 200)
-Temps = np.arange(850, 1425, 25)
+Temps = np.arange(850, 1225, 25)
 omap = np.zeros((len(Temps), len(Idensities)))
 
 taskqueue = itertools.product(Temps, Idensities)
@@ -32,7 +34,11 @@ i = 0
 
 def do_work(T, I):
     with dstorelock:
-        cse = CalcSimExecutor(dstore, T)
+        Davg = dstore.interpolated_diffusivity(1001, T).mean()
+        n_secs_sim = 1e-12 / Davg
+        ndt = int(n_secs_sim / defaults.simulation_dt)
+        cse = CalcSimExecutor(dstore, T, ndt=ndt)
+
     try:
         current = cse.compute(z, cvfunc(I), I, 'forward')[:, 1]
         nocurrent = cse.compute(0, 1, 0, 'forward')[:, 1]
@@ -40,8 +46,9 @@ def do_work(T, I):
         print('Fucked up on T = {}, I = {}'.format(T, I))
         print('Max D = {}'.format(cse.Dvector.max()))
         raise
-    lsq_arr = (current - nocurrent) ** 2
-    return np.sum(lsq_arr)
+    shiftengine = ComparisonEngine(cse.cs)
+    lsq, _ = shiftengine.calibrate(current, nocurrent)
+    return lsq
 
 with ThreadPoolExecutor(max_workers=8) as executor:
     future_dict = dict(

@@ -8,7 +8,7 @@ import numpy as np
 
 class CalcSimExecutor():
 
-    def __init__(self, dstore, T):
+    def __init__(self, dstore, T, ndt=defaults.simulation_tsteps):
         assert isinstance(dstore, InputDatastore)
 
         self.T = T
@@ -17,7 +17,7 @@ class CalcSimExecutor():
         self.dx = defaults.simulation_dx
         self.dt = defaults.simulation_dt
         self.ndx = defaults.simulation_xsteps
-        self.ndt = defaults.simulation_tsteps
+        self.ndt = ndt
 
         #now we can set up the initial conditions
         #x in micron
@@ -26,7 +26,7 @@ class CalcSimExecutor():
         self.init_cond[(self.ndx // 2):] = 0
 
         #D/R vectors
-        self.Dvector = dstore.interpolated_diffusivity(10001, T).copy()
+        self.Dvector = dstore.interpolated_diffusivity(10001, T, precise=True).copy()
         self.Rvector = dstore.interpolated_resistivity(10001, T).copy()
 
         self.cs = CalcSimWrapper()

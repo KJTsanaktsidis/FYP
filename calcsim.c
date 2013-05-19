@@ -69,8 +69,18 @@ int calc_simulation(const double* Dvector,
             double d2Cdx2 = (prevStep[k+1] - 2 * prevStep[k] + prevStep[k-1]) / (dx * dx);
 
             //the next step
-            simResults[k] = dt * (Dv*d2Cdx2 + dDdc*dCdx*dCdx - dDdc*dCdx*C*Rv*r - Dv*Rv*dCdx*r
+            /*double simc = dt * (Dv*d2Cdx2 + dDdc*dCdx*dCdx - dDdc*dCdx*C*Rv*r - Dv*Rv*dCdx*r
                                   -Dv*dRdc*dCdx*C*r) + prevStep[k];
+                                  */
+            double simc = dt * (Dv*d2Cdx2 + dDdc*dCdx*dCdx - dDdc*C*Rv*r - Dv*Rv*dCdx*r
+                                   -Dv*dRdc*dCdx*r) + prevStep[k];                   
+            //Smooth out major fuckups in simc; for somereason these are appearing
+            //Probably because dDdC is much bigger with this model
+            /*if (simc > 1.0)
+                simc = 1.0;
+            else if (simc < 0.0)
+                simc = 0.0;*/
+            simResults[k] = simc;
         }
 
         //Now swap current step into prev step

@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from os import path
 import os
 import re
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 from calcsim import CalcSimWrapper
 from datastore import InputDatastore
 from expercomparison import ComparisonEngine
@@ -23,9 +24,7 @@ args = aparser.parse_args()
 
 accelcs = CalcSimWrapper()
 
-fdstore = InputDatastore(args.inputdata, args.dataprefix, args.temperature, 'forward')
-rdstore = InputDatastore(args.inputdata, args.dataprefix, args.temperature, 'reverse')
-dstores = {'forward': fdstore, 'reverse': rdstore}
+dstore = InputDatastore(args.inputdata, args.dataprefix)
 x = np.linspace(0, 25, num=100)
 init_cond = np.ones(100)
 init_cond[50:] = 0
@@ -36,13 +35,12 @@ dx = 25e-6 / 100
 
 def quicksim(z, cvf, I, exper, direction):
     ce = ComparisonEngine(accelcs)
-    dstore = dstores[direction]
     if direction == 'reverse':
         I = -np.abs(I)
     else:
         I = np.abs(I)
-    diffusivity = dstore.interpolated_diffusivity(10001)
-    resistivity = dstore.interpolated_resistivity(10001)
+    diffusivity = dstore.interpolated_diffusivity(10001, args.temperature, precise=True)
+    resistivity = dstore.interpolated_resistivity(10001, args.temperature)
     r = accelcs.emigration_factor(z, I * 100 * 100, args.temperature)
     simd = accelcs.calc_simulation(diffusivity, resistivity, init_cond, ndt, dt, dx, r, cvf)
     lsq, shift = ce.calibrate(simd, exper)
@@ -100,7 +98,7 @@ for f in forwardfiles:
     fresults[I] = np.genfromtxt(f, skip_header=0, delimiter=',')
 for f in reversefiles:
     print(str.format('Processing {}', f))
-    I = -int(float(re.match(rx, f).groups()[0]))
+    I = np.abs(int(float(re.match(rx, f).groups()[0])))
     rresults[I] = np.genfromtxt(f, skip_header=0, delimiter=',')
 
 #now, find average z* for forward case
@@ -129,7 +127,7 @@ print(str.format('Rounding to {}', zaverage_rounded))
 cbounds = {}
 for I in cresults.keys():
     bounds_column = cresults[I][zaverage_index, :]
-    bounds_truth = bounds_column < 0.001
+    bounds_truth = bounds_column < 0.005
     contig_idxs = contiguous_regions(bounds_truth)
     contig_sizes = contig_idxs[:, 1] - contig_idxs[:, 0]
     contig_largest_idx = contig_sizes.argmax()
@@ -174,13 +172,13 @@ for direction in ('forward', 'reverse'):
             elif idx == 2:
                 cvf += cbounds[I][idx]
             print('using cvf = ' + str(cvf))
-            if direction == 'forward':
-                exper = dstores[direction].interpolated_experiment_dict(x)[I]
-            else:
-                exper = dstores[direction].interpolated_experiment_dict(x)[-I]
+            edict = dstore.edict_for_direction(direction)
+            exper = dstore.interpolated_experiment_dict(x, edict)[I]
             simd, lsq = quicksim(zaverage_rounded, cvf, I, exper, direction)
             simd = np.column_stack((x, simd))
             exper = np.column_stack((x, exper))
-            dmplots.plot_sim_fit(simd, exper, I, zaverage_rounded, cvf, direction, outfile)
+            f = dmplots.plot_sim_fit(simd, exper, I, zaverage_rounded, cvf, direction)
+            c = FigureCanvasAgg(f)
+            c.print_figure(outfile)
 
 

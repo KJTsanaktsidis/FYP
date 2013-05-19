@@ -1,5 +1,6 @@
 """Entry point for optimum vacancy concentration search
 """
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 import numpy as np
 import dmplots
@@ -34,8 +35,7 @@ aparser.add_argument('--resume', action='store_true', default=False,
 
 args = aparser.parse_args()
 
-fdata = InputDatastore(args.inputdata, args.dataprefix, args.temperature, 'forward')
-rdata = InputDatastore(args.inputdata, args.dataprefix, args.temperature, 'reverse')
+dstore = InputDatastore(args.inputdata, args.dataprefix)
 accelcs = CalcSimWrapper()
 
 zrange = np.arange(args.zlim[0], args.zlim[1], args.zlim[2])
@@ -63,14 +63,15 @@ if args.resume:
         rresults[I] = np.genfromtxt(f, skip_header=0, delimiter=',')
 else:
     #do search for forward/back
-    for direction, dstore, result_stash in [('forward', fdata, fresults), ('reverse', rdata, rresults)]:
+    for direction, result_stash in [('forward', fresults), ('reverse', rresults)]:
         search_engine = ParamSearchEngine(accelcs, dstore)
-        for I in dstore.experimental_dict.keys():
+        edict = dstore.edict_for_direction(direction)
+        for I in edict.keys():
             print(str.format('{} bias, I = {}', direction, I))
             pbar = ProgressBar(widgets=['Parameter search: ', Percentage(), ' ', Bar()],
                                maxval=len(zrange) * len(cvfrange))
             pbar.start()
-            search_map = search_engine.search(zrange, cvfrange, I, args.temperature, pbar.update)
+            search_map = search_engine.search(zrange, cvfrange, I, args.temperature, pbar.update, direction)
             print('\n')
             result_stash[I] = search_map
             outpath = path.join(args.outputdir, str.format('Searchmap_I{}_{}.png', I, direction))
@@ -146,11 +147,12 @@ for direction, result_stash in [('forward', fresults), ('reverse', rresults), ('
     #we should be nice and print comparison plots
     if direction == 'forward' or direction == 'reverse':
         x = np.linspace(0, 25, num=100)
-        dstore = InputDatastore(args.inputdata, args.dataprefix, args.temperature, direction)
+        dstore = InputDatastore(args.inputdata, args.dataprefix)
+        edict = dstore.edict_for_direction(direction)
         accelcs = CalcSimWrapper()
         ce = ComparisonEngine(accelcs)
-        diffusivity = dstore.interpolated_diffusivity(10001)
-        resistivity = dstore.interpolated_resistivity(10001)
+        diffusivity = dstore.interpolated_diffusivity(10001, args.temperature, precise=True)
+        resistivity = dstore.interpolated_resistivity(10001, args.temperature)
         init_cond = np.ones(100)
         init_cond[50:] = 0
         emigration_T = args.temperature
@@ -160,10 +162,10 @@ for direction, result_stash in [('forward', fresults), ('reverse', rresults), ('
         for I in result_stash.keys():
             cvf_best = cvfrange[result_stash[I][zaverage_index, :].argmin()]
             if direction == 'forward':
-                exper_data = dstore.interpolated_experiment_dict(x)[I]
+                exper_data = dstore.interpolated_experiment_dict(x, edict)[I]
                 r = accelcs.emigration_factor(zaverage_rounded, I * 100 * 100, emigration_T)
             else:
-                exper_data = dstore.interpolated_experiment_dict(x)[-I]
+                exper_data = dstore.interpolated_experiment_dict(x, edict)[I]
                 r = accelcs.emigration_factor(zaverage_rounded, -I * 100 * 100, emigration_T)
             simd = accelcs.calc_simulation(diffusivity, resistivity, init_cond, ndt, dt, dx, r, cvf_best)
             lsq, shift = ce.calibrate(simd, exper_data)
@@ -171,5 +173,7 @@ for direction, result_stash in [('forward', fresults), ('reverse', rresults), ('
             full_simd = np.column_stack((x, shifted_simd))
             full_exper = np.column_stack((x, exper_data))
             outfname = os.path.join(args.outputdir, str.format('SimExperComp_I{}_{}.png', I, direction))
-            dmplots.plot_sim_fit(full_simd, full_exper, I, zaverage_rounded, cvf_best, direction, outfname)
+            f = dmplots.plot_sim_fit(full_simd, full_exper, I, zaverage_rounded, cvf_best, direction)
+            c = FigureCanvasAgg(f)
+            c.print_figure(outfname)
 

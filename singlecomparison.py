@@ -46,7 +46,7 @@ class SingleComparisonTask(DiffSimTask):
         try:
             simdata = simexec.compute(self.args.z, self.args.cvf, self.args.current, self.args.direction)
         except SimulationUnstableError:
-            print('Bang! Dmax = {}'.format(simexec.Dvector.max()))
+            print('Bang! Dmax = {}, Dmin = {}'.format(simexec.Dvector.max(), simexec.Dvector.min()))
             raise
         experdata = self.dstore.interpolated_experiment(self.args.current, simdata[:, 0], self.args.direction)
 

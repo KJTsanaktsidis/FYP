@@ -6,6 +6,7 @@ import os.path
 import scipy.interpolate as interp
 import functools
 
+
 class InputDatastore():
 
     def __init__(self, data_dir, prefix):
@@ -17,13 +18,14 @@ class InputDatastore():
         :param Tfloat: Temperature in kelvin
         """
 
-
-
         #we store 3 kinds of data
-        diff_name = os.path.join(data_dir, prefix + '_Diffusivity_973K.csv')
+        precise_diff_name = os.path.join(data_dir, prefix + '_Diffusivity_973K.csv')
         resist_name = os.path.join(data_dir, prefix + '_Resistivity_973K.csv')
+        diff_arrhenius_name = os.path.join(data_dir, prefix + '_Diffusivity_Arrhenius_Constants.csv')
         fw_exper_name = os.path.join(data_dir, str.format('{}_Experimental_{}_{}K.csv', prefix, 'forward', '973'))
         rv_exper_name = os.path.join(data_dir, str.format('{}_Experimental_{}_{}K.csv', prefix, 'reverse', '973'))
+
+        self.precise_diff_raw = np.genfromtxt(precise_diff_name, skip_header=1)
 
         #self.resistivity_raw = np.genfromtxt(resist_name, skip_header=1)
         self.experimental_fw_raw = np.genfromtxt(fw_exper_name, skip_header=0, delimiter=',')
@@ -39,7 +41,7 @@ class InputDatastore():
                           (self.experimental_rv_raw, self.experimental_rv_dict)):
             nSets = np.shape(raw)[1] - 1
             for col_index in range(1, nSets + 1):
-                current = int(np.abs(raw[0, col_index]))
+                current = int(np.round(np.abs(raw[0, col_index])))
                 edict[current] = raw[1:, col_index]
 
         #the 3 resistivity functions
@@ -52,6 +54,9 @@ class InputDatastore():
             self.resistivity_splines[T] = interp.InterpolatedUnivariateSpline(self.resistivity_raw[T][:, 0],
                                                                               self.resistivity_raw[T][:, 1])
 
+        #load up arrhenius constants
+        self.diffusivity_arrhenius_constants = np.genfromtxt(diff_arrhenius_name, delimiter=',')
+
     def interpolated_vector(self, operative_vec, size):
 
         spline = interp.InterpolatedUnivariateSpline(operative_vec[:, 0], operative_vec[:, 1])
@@ -59,10 +64,26 @@ class InputDatastore():
         return spline(x)
 
     @functools.lru_cache(maxsize=512)
-    def interpolated_diffusivity(self, size, T):
+    def interpolated_diffusivity(self, size, T, precise=False):
+        if precise:
+            return self.interpolated_vector(self.precise_diff_raw, size)
         x = np.linspace(0, 1, size)
-        f = lambda c: np.exp(16.53*c-33.14)*np.exp(-(122109*c+28274)/(8.31*T))
-        return f(x)
+        Cmid = self.diffusivity_arrhenius_constants[:, 0]
+        Dmid = self.diffusivity_arrhenius_constants[:, 1] * 1e-4 * np.exp(-self.diffusivity_arrhenius_constants[:, 2]
+                                                                          * 1e3/(8.31 * T))
+        #straight line on log axes...
+        lnDmid = np.log(Dmid)
+        cfs = np.polyfit(Cmid, lnDmid, 1)
+        Dout = np.exp(cfs[0] * x + cfs[1])
+
+        #but make it constant at the edges
+        startfilter = np.where(x < Cmid[0])
+        endfilter = np.where(x > Cmid[-1])
+        startcopy = Dout[len(startfilter[0])]
+        endcopy = Dout[-len(endfilter[0])]
+        Dout[startfilter] = startcopy
+        Dout[endfilter] = endcopy
+        return Dout
 
     @functools.lru_cache(maxsize=512)
     def interpolated_resistivity(self, size, T):
@@ -70,7 +91,9 @@ class InputDatastore():
         a2 = 0.0461 * T - 144.7
         a1 = -0.0275 * T + 161.1
         a0 = 0.00888 * T - 2.605
-        f = lambda c: (a2 * c ** 2 + a1 * c + a0) * 10e-8
+        #oops, forgot to switch around to Cu solute, full Cu c == 1
+        #hack at it by doing 1-c
+        f = lambda c: (a2 * (1-c) ** 2 + a1 * (1-c) + a0) * 10e-8
         return f(x)
 
     def interpolated_experiment(self, current, x, edict):
