@@ -17,11 +17,12 @@ import progressbar
 dstore = InputDatastore('../InputData', 'NiCu')
 dstorelock = RLock()
 
-z = 1875
-cvfunc = lambda ID: 0.0014 * ID
+z = 160
+cvfunc = lambda ID: 0.53e-3 * abs(ID) + 1
+direction = 'forward'
 
-Idensities = np.arange(0, 10200, 200)
-Temps = np.arange(850, 1225, 25)
+Idensities = np.arange(0, 5020, 100)
+Temps = np.arange(1030, 1070, 2)
 omap = np.zeros((len(Temps), len(Idensities)))
 
 taskqueue = itertools.product(Temps, Idensities)
@@ -36,12 +37,12 @@ def do_work(T, I):
     with dstorelock:
         Davg = dstore.interpolated_diffusivity(1001, T).mean()
         n_secs_sim = 1e-12 / Davg
-        ndt = int(n_secs_sim / defaults.simulation_dt)
-        cse = CalcSimExecutor(dstore, T, ndt=ndt)
+        dt = n_secs_sim / (defaults.simulation_tsteps * 1)
+        cse = CalcSimExecutor(dstore, T, dt=dt, ndt=(defaults.simulation_tsteps * 1))
 
     try:
-        current = cse.compute(z, cvfunc(I), I, 'forward')[:, 1]
-        nocurrent = cse.compute(0, 1, 0, 'forward')[:, 1]
+        current = cse.compute(z, cvfunc(I), I, direction)[:, 1]
+        nocurrent = cse.compute(0, 1, 0, direction)[:, 1]
     except SimulationUnstableError:
         print('Fucked up on T = {}, I = {}'.format(T, I))
         print('Max D = {}'.format(cse.Dvector.max()))
@@ -70,11 +71,11 @@ np.savetxt('../regionmap.csv', omap)
 fig = Figure()
 ax = fig.add_subplot(111)
 extent = Idensities[0], Idensities[-1], Temps[0], Temps[-1]
-im = ax.imshow(omap, cmap=cm.jet, interpolation='nearest', extent=extent)
+im = ax.imshow(omap, cmap=cm.jet, interpolation='nearest', extent=extent, origin='lower')
 fig.colorbar(im)
 ax.set_aspect('auto')
 ax.set_xlabel('Current Density (A/cm^2)')
 ax.set_ylabel('Temperature (K)')
-ax.set_title(str.format('Error relative to zero-current'))
+ax.set_title(str.format('Error relative to zero-current ({} bias)', direction))
 canvas = FigureCanvasAgg(fig)
 canvas.print_figure('../regionmap.png')
