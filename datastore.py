@@ -83,6 +83,9 @@ class InputDatastore():
         endcopy = Dout[-len(endfilter[0])]
         Dout[startfilter] = startcopy
         Dout[endfilter] = endcopy
+
+        dmean = Dout.mean()
+        #return np.ones(len(Dout)) * dmean
         return Dout
 
     @functools.lru_cache(maxsize=512)

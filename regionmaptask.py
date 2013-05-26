@@ -3,6 +3,7 @@ from threading import RLock
 from matplotlib import cm
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
+import sys
 from calcsim import SimulationUnstableError
 from calcsimexecutor import CalcSimExecutor
 from datastore import InputDatastore
@@ -19,10 +20,10 @@ dstorelock = RLock()
 
 z = 160
 cvfunc = lambda ID: 0.53e-3 * abs(ID) + 1
-direction = 'forward'
+direction = sys.argv[1]
 
-Idensities = np.arange(0, 5020, 100)
-Temps = np.arange(1030, 1070, 2)
+Idensities = np.arange(0, 5100, 100)
+Temps = np.arange(850, 1210, 10)
 omap = np.zeros((len(Temps), len(Idensities)))
 
 taskqueue = itertools.product(Temps, Idensities)
@@ -51,22 +52,22 @@ def do_work(T, I):
     lsq, _ = shiftengine.calibrate(current, nocurrent)
     return lsq
 
-with ThreadPoolExecutor(max_workers=8) as executor:
-    future_dict = dict(
-        (executor.submit(do_work, qit[0], qit[1]), qit) for qit in taskqueue
-    )
-    for res_future in as_completed(future_dict):
-        qit = future_dict[res_future]
+# with ThreadPoolExecutor(max_workers=8) as executor:
+#     future_dict = dict(
+#         (executor.submit(do_work, qit[0], qit[1]), qit) for qit in taskqueue
+#     )
+#     for res_future in as_completed(future_dict):
+#         qit = future_dict[res_future]
+#
+#         Tindex = np.where(Temps == qit[0])[0][0]
+#         Iindex = np.where(Idensities == qit[1])[0][0]
+#
+#         omap[Tindex, Iindex] = res_future.result()
+#         i += 1
+#         pbar.update(i)
 
-        Tindex = np.where(Temps == qit[0])[0][0]
-        Iindex = np.where(Idensities == qit[1])[0][0]
-
-        omap[Tindex, Iindex] = res_future.result()
-        i += 1
-        pbar.update(i)
-
-np.savetxt('../regionmap.csv', omap)
-
+#np.savetxt('../regionmap.csv', omap)
+omap = np.genfromtxt('../regionmap-full-forward.csv')
 
 fig = Figure()
 ax = fig.add_subplot(111)
