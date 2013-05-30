@@ -5,7 +5,7 @@ import defaults
 from expercomparison import ComparisonEngine
 
 
-T = 1052
+T = 1200
 z = 160
 cvf = 0.53e-3 * 0 + 1
 current = 0
@@ -18,13 +18,8 @@ ds = InputDatastore('../InputData', 'NiCu')
 #--CHANGEME
 #simdata_I = cse.compute(z, cvf, current, direction)
 ndt = int(600 // defaults.simulation_dt)
-Tks = [1049, 1049.5, 1050, 1050.5, 1051, 1051.5, 1052]
-simds = []
-
-for Tk in Tks:
-    cse = CalcSimExecutor(ds, Tk, ndt=ndt)
-    sd = cse.compute(z, cvf, 0, 'forward')
-    simds.append(sd)
+cse = CalcSimExecutor(ds, T, ndt=ndt)
+simd = cse.compute(z, cvf, 0, 'forward')
 
 #shiftengine = ComparisonEngine(cse.cs)
 #shiftengine.calibrate(simdata_I[:, 1], simdata_noI[:, 1])
@@ -33,8 +28,8 @@ for Tk in Tks:
 figure()
 
 ndxmult = 1
-for Tk, simd in zip(Tks, simds):
-    plot(simd[(105*ndxmult):(120*ndxmult), 0], simd[(105*ndxmult):(120*ndxmult), 1], label='T = {}K'.format(Tk))
+#plot(simd[(105*ndxmult):(120*ndxmult), 0], simd[(105*ndxmult):(120*ndxmult), 1], label='T = {}K'.format(T))
+plot(simd[:, 0], simd[:, 1], label='T = {}K'.format(T))
 
 xlabel('Position (micron)')
 ylabel('Cu Composition (at. fraction)')
