@@ -12,7 +12,7 @@ z = 160
 #cvf = 1
 ofile = 'lel'
 ds = InputDatastore('../InputData', 'NiCu')
-direction = 'forward'
+direction = 'reverse'
 
 #matplotlib.rcParams['svg.fonttype'] = 'none'
 matplotlib.rcParams['axes.labelsize'] = 24
@@ -27,7 +27,7 @@ figure()
 cse = CalcSimExecutor(ds, T)
 colours = ['#0000FF', '#FF0000', '#003300', '#DD8500']
 colours.reverse()
-for I, sh in [[0, 0.7], [400, 0.5], [800, 0.11], [1000, 0]]:
+for I, sh in [[0, 0], [400, 0], [800, 0], [1000, 0]]:
     cvf = 0.53e-3 * I + 1
     simd = cse.compute(z, cvf, I, direction)
     x = simd[:, 0]
