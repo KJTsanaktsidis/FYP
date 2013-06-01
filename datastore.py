@@ -84,7 +84,7 @@ class InputDatastore():
         Dout[startfilter] = startcopy
         Dout[endfilter] = endcopy
 
-        dmean = Dout.mean()
+        #dmean = Dout.mean()
         #return np.ones(len(Dout)) * dmean
         return Dout
 

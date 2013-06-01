@@ -2,7 +2,7 @@
 anticipate needing much control over
 """
 
-simulation_xsteps = 10000
-simulation_dx = 25e-6 / 10000
-simulation_tsteps = int(2 * 60 * 60 / 0.000025)
-simulation_dt = 0.000025
+simulation_xsteps = 200
+simulation_dx = 25e-6 / 200
+simulation_tsteps = int(2 * 60 * 60 / 0.025)
+simulation_dt = 0.025

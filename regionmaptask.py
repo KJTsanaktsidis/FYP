@@ -67,7 +67,7 @@ def do_work(T, I):
 #         pbar.update(i)
 
 #np.savetxt('../regionmap.csv', omap)
-omap = np.genfromtxt('../regionmap-full-forward.csv')
+omap = np.genfromtxt('../regionmap-{}-Dconst.csv'.format(direction))
 
 fig = Figure()
 ax = fig.add_subplot(111)
@@ -77,6 +77,6 @@ fig.colorbar(im)
 ax.set_aspect('auto')
 ax.set_xlabel('Current Density (A/cm^2)')
 ax.set_ylabel('Temperature (K)')
-ax.set_title(str.format('Error relative to zero-current ({} bias)', direction))
+#ax.set_title(str.format('Error relative to zero-current ({} bias)', direction))
 canvas = FigureCanvasAgg(fig)
 canvas.print_figure('../regionmap.png')
