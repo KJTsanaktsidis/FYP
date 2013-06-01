@@ -84,9 +84,9 @@ class InputDatastore():
         Dout[startfilter] = startcopy
         Dout[endfilter] = endcopy
 
-        #dmean = Dout.mean()
-        #return np.ones(len(Dout)) * dmean
-        return Dout
+        dmean = Dout.mean()
+        return np.ones(len(Dout)) * dmean
+        #return Dout
 
     @functools.lru_cache(maxsize=512)
     def interpolated_resistivity(self, size, T):

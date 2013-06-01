@@ -1,6 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import RLock
 from matplotlib import cm
+import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 import sys
@@ -65,18 +66,25 @@ def do_work(T, I):
 #         omap[Tindex, Iindex] = res_future.result()
 #         i += 1
 #         pbar.update(i)
+#
+# np.savetxt('../regionmap.csv', omap)
+omap = np.genfromtxt('../pg_regionmap_{}.csv'.format(direction))
 
-#np.savetxt('../regionmap.csv', omap)
-omap = np.genfromtxt('../regionmap-{}-Dconst.csv'.format(direction))
+matplotlib.rcParams['axes.labelsize'] = 24
+matplotlib.rcParams['legend.fontsize'] = 22
+matplotlib.rcParams['xtick.labelsize'] = 20
+matplotlib.rcParams['ytick.labelsize'] = 20
 
 fig = Figure()
 ax = fig.add_subplot(111)
 extent = Idensities[0], Idensities[-1], Temps[0], Temps[-1]
 im = ax.imshow(omap, cmap=cm.jet, interpolation='nearest', extent=extent, origin='lower')
-fig.colorbar(im)
+cb = fig.colorbar(im)
+cb.set_ticks(np.arange(0, np.max(np.max(omap)), 0.04))
 ax.set_aspect('auto')
-ax.set_xlabel('Current Density (A/cm^2)')
+ax.set_xlabel(r'Current Density ($A/cm^2$)')
 ax.set_ylabel('Temperature (K)')
 #ax.set_title(str.format('Error relative to zero-current ({} bias)', direction))
+fig.tight_layout()
 canvas = FigureCanvasAgg(fig)
 canvas.print_figure('../regionmap.png')

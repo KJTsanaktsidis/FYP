@@ -2,14 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/singlesim.py" afterPath="$PROJECT_DIR$/singlesim.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/calcsimexecutor.py" afterPath="$PROJECT_DIR$/calcsimexecutor.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/datastore.py" afterPath="$PROJECT_DIR$/datastore.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regionmaptask.py" afterPath="$PROJECT_DIR$/regionmaptask.py" />
     </list>
     <ignored path="diffsim.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/Dummy.txt" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1370059273804" ignored="false" />
     <file path="/setup.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1365773662460" ignored="false" />
     <file path="/calcsim.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1369876714732" ignored="false" />
-    <file path="/datastore.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1369875034442" ignored="false" />
+    <file path="/datastore.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1370065990338" ignored="false" />
     <file path="/sanitychecker.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1365859215252" ignored="false" />
     <file path="/expercomparison.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1367063541623" ignored="false" />
     <file path="/paramsearch.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1368926594010" ignored="false" />
@@ -35,9 +37,9 @@
     <file path="/defaults.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1369874926639" ignored="false" />
     <file path="/singlecomparison.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1368171075679" ignored="false" />
     <file path="/outstore.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1367652434128" ignored="false" />
-    <file path="/calcsimexecutor.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1370060112982" ignored="false" />
+    <file path="/calcsimexecutor.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1370065976075" ignored="false" />
     <file path="/dispatch.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1367651133723" ignored="false" />
-    <file path="/regionmaptask.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1369891550959" ignored="false" />
+    <file path="/regionmaptask.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1370071420173" ignored="false" />
     <file path="/correctiontest.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1368178044487" ignored="false" />
     <file path="/dmsearchv2.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1368946220512" ignored="false" />
     <file path="/singlesim.py" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1370065805867" ignored="false" />
@@ -61,10 +63,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="regionmaptask.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="regionmaptask.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/regionmaptask.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="69" column="66" selection-start="2314" selection-end="2314" vertical-scroll-proportion="0.0">
+            <state line="84" column="32" selection-start="2832" selection-end="2832" vertical-scroll-proportion="0.8462415">
               <folding />
             </state>
           </provider>
@@ -73,7 +75,7 @@
       <file leaf-file-name="datastore.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/datastore.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="99" column="19" selection-start="4299" selection-end="4299" vertical-scroll-proportion="0.0">
+            <state line="88" column="9" selection-start="3878" selection-end="3878" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -88,15 +90,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="checkerboard.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/checkerboard.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="59" selection-start="871" selection-end="871" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="defaults.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/defaults.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -106,19 +99,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="singlecomparison.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/singlecomparison.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="92" selection-start="1285" selection-end="1285" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="singlesim.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="singlesim.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/singlesim.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="29" column="29" selection-start="806" selection-end="806" vertical-scroll-proportion="0.42710707">
+            <state line="17" column="0" selection-start="353" selection-end="527" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -136,7 +120,7 @@
       <file leaf-file-name="calcsimexecutor.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/calcsimexecutor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="77" selection-start="858" selection-end="858" vertical-scroll-proportion="0.0">
+            <state line="28" column="78" selection-start="859" selection-end="859" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -170,12 +154,12 @@
         <option value="$PROJECT_DIR$/dmsearchv2.py" />
         <option value="$PROJECT_DIR$/dmplots.py" />
         <option value="$PROJECT_DIR$/checkerboard.py" />
-        <option value="$PROJECT_DIR$/datastore.py" />
         <option value="$PROJECT_DIR$/defaults.py" />
         <option value="$PROJECT_DIR$/calcsim.py" />
-        <option value="$PROJECT_DIR$/regionmaptask.py" />
-        <option value="$PROJECT_DIR$/calcsimexecutor.py" />
         <option value="$PROJECT_DIR$/singlesim.py" />
+        <option value="$PROJECT_DIR$/calcsimexecutor.py" />
+        <option value="$PROJECT_DIR$/datastore.py" />
+        <option value="$PROJECT_DIR$/regionmaptask.py" />
       </list>
     </option>
   </component>
@@ -481,14 +465,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/singlecomparison.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="92" selection-start="1285" selection-end="1285" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/regionmaptask.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="69" column="66" selection-start="2314" selection-end="2314" vertical-scroll-proportion="0.0">
+        <state line="34" column="92" selection-start="1285" selection-end="1285" vertical-scroll-proportion="0.44419134">
           <folding />
         </state>
       </provider>
@@ -502,7 +479,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/datastore.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="99" column="19" selection-start="4299" selection-end="4299" vertical-scroll-proportion="0.0">
+        <state line="88" column="9" selection-start="3878" selection-end="3878" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/singlesim.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="0" selection-start="353" selection-end="527" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/calcsimexecutor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="78" selection-start="859" selection-end="859" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -514,16 +505,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/calcsimexecutor.py">
+    <entry file="file://$PROJECT_DIR$/regionmaptask.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="77" selection-start="858" selection-end="858" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/singlesim.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="29" selection-start="806" selection-end="806" vertical-scroll-proportion="0.42710707">
+        <state line="84" column="32" selection-start="2832" selection-end="2832" vertical-scroll-proportion="0.8462415">
           <folding />
         </state>
       </provider>

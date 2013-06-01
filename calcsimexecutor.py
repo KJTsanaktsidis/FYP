@@ -26,7 +26,7 @@ class CalcSimExecutor():
         self.init_cond[(self.ndx // 2):] = 0
 
         #D/R vectors
-        self.Dvector = dstore.interpolated_diffusivity(10001, T, precise=True).copy()
+        self.Dvector = dstore.interpolated_diffusivity(10001, T, precise=False).copy()
         self.Rvector = dstore.interpolated_resistivity(10001, T).copy()
 
         self.cs = CalcSimWrapper()
