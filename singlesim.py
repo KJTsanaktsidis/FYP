@@ -6,38 +6,47 @@ from expercomparison import ComparisonEngine
 
 
 T = 700+273
-z = 160
-I = 1000
-cvf = 0.53e-3 * I + 1
+z = 700
+#I = 1000
+cvf = 0.53e-3 * 0 + 1
 #cvf = 1
-ofile = 'lel.png'
+ofile = 'lel'
 ds = InputDatastore('../InputData', 'NiCu')
+direction = 'reverse'
 
-cse = CalcSimExecutor(ds, T)
-simd_forward = cse.compute(z, cvf, I, 'forward')
-simd_reverse = cse.compute(z, cvf, I, 'reverse')
-x = simd_forward[:, 0]
-fedict = ds.interpolated_experiment_fw_dict(x)
-redict = ds.interpolated_experiment_rv_dict(x)
-expr_forward = fedict[I]
-expr_reverse = redict[I]
+#matplotlib.rcParams['svg.fonttype'] = 'none'
+matplotlib.rcParams['axes.labelsize'] = 24
+matplotlib.rcParams['legend.fontsize'] = 22
+matplotlib.rcParams['xtick.labelsize'] = 20
+matplotlib.rcParams['ytick.labelsize'] = 20
 
-shifter = ComparisonEngine(cse.cs)
-shifter.calibrate(simd_forward[:, 1], expr_forward)
-simd_forward[:, 1] = shifter.shift_data(simd_forward[:, 1])
-shifter.calibrate(simd_reverse[:, 1], expr_reverse)
-simd_reverse[:, 1] = shifter.shift_data(simd_reverse[:, 1])
+def get_edict(x):
+    return ds.interpolated_experiment_fw_dict(x) if direction == 'forward' else ds.interpolated_experiment_rv_dict(x)
 
 figure()
+cse = CalcSimExecutor(ds, T)
+colours = ['#0000FF', '#FF0000', '#003300', '#DD8500']
+colours.reverse()
+for I, sh in [[0, 0], [400, 0.25], [800, 0.5], [1000, 0.6]]:
+    simd = cse.compute(z, cvf, I, direction)
+    x = simd[:, 0]
+    edict = get_edict(x)
+    expr = edict[I]
+    shifter = ComparisonEngine(cse.cs)
+    shifter.calibrate(simd[:, 1], expr)
+    #simd[:, 1] = shifter.shift_data(simd[:, 1])
 
-plot(x, expr_forward, 'b', label=r'Ni->Cu $e^-$ flow (Zhao et. al.)')
-plot(x, simd_forward[:, 1], 'r--', label=r'Ni->Cu $e^-$ flow (simulation)')
-plot(x, expr_reverse, 'g', label=r'Cu->Ni $e^-$ flow (Zhao et. al.)')
-plot(x, simd_reverse[:, 1], color='orange', linestyle='--', label='Cu->Ni $e^-$ flow (simulation)')
+    x += sh
+    cl = colours.pop()
+    #plot(x, expr, linestyle='-', label='I = {}A/cm^2'.format(I))
+    plot(x, simd[:, 1], linestyle='-', color=cl, linewidth=2, label=r'$\mathrm{'+str(I)+'A/cm}^2$')
 
-xlabel('Position (micron)')
-ylabel('Cu Composition (at. fraction)')
 xlim([5, 20])
-
-legend(loc='best', prop={'size': 10})
-savefig(ofile)
+xticks(arange(5, 21, 5))
+xlabel('Position (micron)')
+ylabel('Cu Composition (at. frac.)')
+lg = legend(loc='center left')
+lg.get_frame().set_alpha(0)
+lg.get_frame().set_edgecolor('white')
+savefig(ofile + '.svg')
+savefig(ofile + '.png')
