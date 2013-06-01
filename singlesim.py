@@ -12,7 +12,7 @@ cvf = 0.53e-3 * 0 + 1
 #cvf = 1
 ofile = 'lel'
 ds = InputDatastore('../InputData', 'NiCu')
-direction = 'reverse'
+direction = 'forward'
 
 #matplotlib.rcParams['svg.fonttype'] = 'none'
 matplotlib.rcParams['axes.labelsize'] = 24
@@ -27,7 +27,7 @@ figure()
 cse = CalcSimExecutor(ds, T)
 colours = ['#0000FF', '#FF0000', '#003300', '#DD8500']
 colours.reverse()
-for I, sh in [[0, 0], [400, 0.25], [800, 0.5], [1000, 0.6]]:
+for I, sh in [[0, 0.7], [400, 0.5], [800, 0.06], [1000, 0]]:
     simd = cse.compute(z, cvf, I, direction)
     x = simd[:, 0]
     edict = get_edict(x)
