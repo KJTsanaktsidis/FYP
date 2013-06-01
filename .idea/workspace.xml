@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/regionmaptask.py" afterPath="$PROJECT_DIR$/regionmaptask.py" />
-    </list>
+    <list default="true" id="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" name="Default" comment="" />
     <ignored path="diffsim.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/Dummy.txt" changelist="0fd13151-8845-468a-bbfb-5ed5cd5e5e52" time="1370059273804" ignored="false" />
